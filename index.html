@@ -1,163 +1,8 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>Alliumflower ERP</title>
-
-    <!-- Сначала загружаем библиотеки Firebase, чтобы они были доступны сразу -->
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-    <script src="https://gstatic.com"></script>
-
-    <script>
-        // Конфигурация вашей базы данных Alliumshop
-        const firebaseConfig = {
-            apiKey: "AIzaSyAjvGmsPZSJGc0bnlsg9s4mntXuReBQM1E",
-            authDomain: "://firebaseapp.com",
-            databaseURL: "https://firebasedatabase.app",
-            projectId: "alliumshop",
-            storageBucket: "alliumshop.firebasestorage.app",
-            messagingSenderId: "115056113788",
-            appId: "1:115056113788:web:e228808cb564c9718671f9",
-            measurementId: "G-4E4E1EG9FJ"
-        };
-
-        // Мгновенная инициализация сервисов
-        firebase.initializeApp(firebaseConfig);
-        const auth = firebase.auth();
-        const db = firebase.firestore();
-    </script>
-    
-    <style>
-        :root {
-            --bg-main: #0b0b0c;
-            --bg-card: #161618;
-            --bg-input: #242426;
-            --text-main: #ffffff;
-            --text-muted: #8e8e93;
-            --accent: #9d4edd;
-            --accent-glow: rgba(157, 78, 221, 0.25);
-            --status-paid: #34c759;
-            --status-packaging: #ff9500;
-            --status-shipping: #5ac8fa;
-            --status-delivered: #af52de;
-            --safe-area-top: env(safe-area-inset-top, 0px);
-            --safe-area-bottom: env(safe-area-inset-bottom, 0px);
-        }
-
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; -webkit-font-smoothing: antialiased; }
-        body { background-color: var(--bg-main); color: var(--text-main); overflow-x: hidden; min-height: 100vh; }
-        .hidden { display: none !important; }
-
-        .auth-screen { min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
-        .auth-card { background: var(--bg-card); border: 1px solid rgba(255, 255, 255, 0.05); padding: 30px; border-radius: 20px; width: 100%; max-width: 400px; box-shadow: 0 10px 30px rgba(0,0,0,0.5); text-align: center; }
-        .auth-card h2 { font-size: 1.8rem; margin-bottom: 5px; letter-spacing: -0.5px; }
-        .subtitle { color: var(--text-muted); font-size: 0.9rem; margin-bottom: 30px; }
-
-        .app-container { min-height: 100vh; display: flex; flex-direction: column; padding-bottom: calc(75px + var(--safe-area-bottom)); }
-        .app-header { background: rgba(22, 22, 24, 0.8); backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); padding: calc(15px + var(--safe-area-top)) 20px 15px; display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid rgba(255, 255, 255, 0.05); position: sticky; top: 0; z-index: 100; }
-        .user-name { font-weight: 600; font-size: 1rem; }
-        .user-badge { font-size: 0.75rem; padding: 2px 8px; border-radius: 10px; background: var(--accent-glow); color: var(--accent); font-weight: 600; text-transform: uppercase; margin-left: 6px; }
-
-        .input-group { margin-bottom: 16px; text-align: left; display: flex; flex-direction: column; }
-        .input-group label { font-size: 0.8rem; color: var(--text-muted); margin-bottom: 6px; padding-left: 4px; }
-        .input-group input, .input-group select, .input-group textarea { background: var(--bg-input); border: 1px solid rgba(255, 255, 255, 0.05); border-radius: 12px; padding: 14px; color: var(--text-main); font-size: 1rem; outline: none; }
-        .input-group input:focus, .input-group select:focus, .input-group textarea:focus { border-color: var(--accent); }
-
-        .btn-primary { background: var(--accent); color: white; border: none; padding: 14px; border-radius: 12px; font-size: 1rem; font-weight: 600; cursor: pointer; width: 100%; box-shadow: 0 4px 15px var(--accent-glow); margin-top: 10px; }
-        .btn-logout { background: none; border: 1px solid rgba(255,255,255,0.15); color: var(--text-main); padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 0.85rem; }
-        .btn-action { background: #2c2c2e; color: #fff; border: none; padding: 8px 14px; border-radius: 10px; font-size: 0.9rem; cursor: pointer; }
-        .btn-link { background: none; border: none; color: var(--accent); cursor: pointer; font-size: 0.85rem; margin-top: 15px; text-decoration: underline; display: block; width: 100%; text-align: center; }
-
-        main { padding: 20px; max-width: 800px; margin: 0 auto; width: 100%; }
-        .tab-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        
-        .form-card { background: var(--bg-card); padding: 20px; border-radius: 16px; border: 1px solid rgba(255,255,255,0.05); margin-bottom: 25px; }
-        .form-card h3 { margin-bottom: 15px; font-size: 1.2rem; }
-
-        .order-card { background: var(--bg-card); border-left: 4px solid var(--text-muted); border-radius: 14px; padding: 16px; margin-bottom: 12px; }
-        .order-card.status-paid { border-left-color: var(--status-paid); }
-        .order-card.status-packaging { border-left-color: var(--status-packaging); }
-        .order-card.status-shipping { border-left-color: var(--status-shipping); }
-        .order-card.status-delivered { border-left-color: var(--status-delivered); }
-
-        .item-row-display { font-size: 0.9rem; color: var(--text-muted); background: rgba(0,0,0,0.2); padding: 6px 10px; border-radius: 6px; margin-top: 5px; }
-
-        .inventory-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(220px, 1fr)); gap: 15px; margin-top: 15px; }
-        .inv-card { background: var(--bg-card); border: 1px solid rgba(255,255,255,0.05); padding: 16px; border-radius: 14px; display: flex; flex-direction: column; justify-content: space-between; }
-        .inv-stock { font-size: 1.4rem; font-weight: 700; color: var(--accent); margin: 10px 0; }
-        .inv-critical { border-color: var(--status-packaging); }
-
-        .employee-item { display: flex; justify-content: space-between; align-items: center; background: var(--bg-card); padding: 14px; border-radius: 12px; margin-bottom: 8px; border: 1px solid rgba(255,255,255,0.02); }
-        .emp-role { font-size: 0.8rem; color: var(--accent); font-weight: bold; text-transform: uppercase; }
-
-        .card-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .order-number { font-weight: 700; font-size: 1.1rem; }
-        .order-price { color: var(--accent); font-weight: 700; }
-
-        .bottom-nav { position: fixed; bottom: 0; left: 0; right: 0; height: calc(65px + var(--safe-area-bottom)); background: rgba(22, 22, 24, 0.85); backdrop-filter: blur(30px); -webkit-backdrop-filter: blur(30px); border-top: 1px solid rgba(255, 255, 255, 0.08); display: flex; justify-content: space-around; padding-bottom: var(--safe-area-bottom); z-index: 99; }
-        .nav-item { background: none; border: none; color: var(--text-muted); font-size: 0.8rem; display: flex; flex-direction: column; align-items: center; justify-content: center; cursor: pointer; width: 100%; }
-        .nav-item.active { color: var(--accent); font-weight: 600; }
-    </style>
-</head>
-<body>
-
-    <div id="auth-screen" class="auth-screen">
-        <div class="auth-card">
-            <h2>Alliumflower</h2>
-            <p class="subtitle">Система управления магазином</p>
-            <form id="auth-form">
-                <div class="input-group">
-                    <label>Email сотрудника</label>
-                    <input type="email" id="auth-email" required placeholder="example@alliumflower.ru">
-                </div>
-                <div class="input-group">
-                    <label>Пароль</label>
-                    <input type="password" id="auth-password" required placeholder="••••••••">
-                </div>
-                <button type="submit" class="btn-primary">Войти в систему</button>
-            </form>
-            <button id="btn-auto-admin" class="btn-link">Создать учетную запись Администратора</button>
-        </div>
-    </div>
-
-    <div id="app-container" class="app-container hidden">
-        <header class="app-header">
-            <div>
-                <span id="user-display-name" class="user-name">Загрузка...</span>
-                <span id="user-display-role" class="user-badge">-</span>
-            </div>
-            <button id="btn-logout" class="btn-logout">Выйти</button>
-        </header>
-
-        <main id="main-content"></main>
-
-        <nav class="bottom-nav">
-            <button class="nav-item active" data-target="orders">📦 Заказы</button>
-            <button class="nav-item" id="nav-inventory" data-target="inventory">💐 Склад</button>
-            <button class="nav-item" id="nav-admin" data-target="admin">👥 Персонал</button>
-        </nav>
-    </div>
-
-    <script>
-        const AppState = { currentUser: null, currentRole: null, activeTab: 'orders', cachedItems: [] };
-
-        auth.onAuthStateChanged(async (user) => {
-            if (user) {
-                try {
-                    const doc = await db.collection('employees').doc(user.uid).get();
-                    if (doc.exists && doc.data().isActive) {
-                        AppState.currentUser = doc.data();
-                        AppState.currentRole = doc.data().role;
-                        initInterface();
-                    } else {
-                        alert('Доступ заблокирован. Вас нет в базе данных сотрудников.');
-                        auth.signOut();
-
+alert('Доступ заблокирован. Вас нет в базе данных сотрудников.');
+auth.signOut();
 }
 } catch (e) {
-alert('Ошибка проверки прав доступа.');
+alert('Ошибка верификации аккаунта: ' + e.message);
 auth.signOut();
 }
 } else {
@@ -165,13 +10,14 @@ document.getElementById('app-container').classList.add('hidden');
 document.getElementById('auth-screen').classList.remove('hidden');
 }
 });
+// Форма входа
 document.getElementById('auth-form').addEventListener('submit', (e) => {
 e.preventDefault();
 const email = document.getElementById('auth-email').value;
 const password = document.getElementById('auth-password').value;
-auth.signInWithEmailAndPassword(email, password)
-.catch(err => alert('Ошибка входа: ' + err.message));
+auth.signInWithEmailAndPassword(email, password).catch(err => alert('Ошибка входа: ' + err.message));
 });
+// Кнопка автосоздания правильного админа в чистую базу данных
 document.getElementById('btn-auto-admin').addEventListener('click', async () => {
 const email = "nash0082008@icloud.com";
 const pass = "2020Mansur";
@@ -184,12 +30,21 @@ role: "admin",
 isActive: true,
 createdAt: new Date().toISOString()
 });
-alert("Успешно создано!\nТеперь введите ваши данные в форму входа.");
+alert("Успешно создано в новой чистой базе!\nТеперь вводите ваши данные для входа.");
 } catch(err) {
 if (err.code === "auth/email-already-in-use") {
-alert("Этот профиль уже зарегистрирован. Просто введите ваш Email и Пароль в форму выше для входа.");
+// Если в Authentication юзер остался, просто заново пишем документ в чистый Firestore
+const user = auth.currentUser || (await auth.signInWithEmailAndPassword(email, pass)).user;
+await db.collection('employees').doc(user.uid).set({
+name: "Главный Администратор",
+email: email,
+role: "admin",
+isActive: true,
+createdAt: new Date().toISOString()
+});
+alert("Профиль восстановлен в базе данных! Вводите логин и пароль.");
 } else {
-alert("Ошибка создания: " + err.message);
+alert("Ошибка: " + err.message);
 }
 }
 });
@@ -209,10 +64,6 @@ document.getElementById('user-display-name').textContent = AppState.currentUser.
 document.getElementById('user-display-role').textContent = translateRole(AppState.currentRole);
 if (AppState.currentRole !== 'admin') document.getElementById('nav-admin').classList.add('hidden');
 if (AppState.currentRole === 'courier') document.getElementById('nav-inventory').classList.add('hidden');
-db.collection('inventory').onSnapshot(snap => {
-AppState.cachedItems = [];
-snap.forEach(d => AppState.cachedItems.push({ id: d.id, ...d.data() }));
-});
 switchTab(AppState.activeTab);
 }
 function translateRole(role) {
@@ -234,7 +85,7 @@ container.innerHTML = <div class="tab-header"><h2>Заказы магазина<
 Итоговая стоимость (₽)
 Создать и отправить в цех
 
-: ''} <div id="orders-feed">Загрузка ленты...</div>;
+ : ''} <div id="orders-feed">Загрузка ленты...</div>;
 if(document.getElementById('order-form')) {
 document.getElementById('order-form').addEventListener('submit', createOrder);
 }
@@ -248,11 +99,11 @@ const item = document.createElement('div');
 item.className = order-card status-${order.status};
 let selectHtml = '';
 if (['admin', 'operator', 'florist'].includes(AppState.currentRole)) {
-selectHtml = <select onchange="updateOrderStatus('${doc.id}', this.value)" style="background:#242426; color:#fff; border:1px solid #444; border-radius:6px; padding:4px 8px;"> <option value="paid" ${order.status==='paid'?'selected':''}>Оплачен</option> <option value="packaging" ${order.status==='packaging'?'selected':''}>Сборка / Упаковка</option> <option value="shipping" ${order.status==='shipping'?'selected':''}>Передан в доставку</option> <option value="delivered" ${order.status==='delivered'?'selected':''}>Доставлен</option> </select>;
+selectHtml =  <select onchange="updateOrderStatus('${doc.id}', this.value)" style="background:#242426; color:#fff; border:1px solid #444; border-radius:6px; padding:4px 8px;"> <option value="paid" ${order.status==='paid'?'selected':''}>Оплачен</option> <option value="packaging" ${order.status==='packaging'?'selected':''}>Сборка / Упаковка</option> <option value="shipping" ${order.status==='shipping'?'selected':''}>Передан в доставку</option> <option value="delivered" ${order.status==='delivered'?'selected':''}>Доставлен</option> </select>;
 } else if (AppState.currentRole === 'courier' && order.status === 'shipping') {
 selectHtml = <button onclick="updateOrderStatus('${doc.id}', 'delivered')" class="btn-action" style="background:var(--status-paid);">Выполнено (Доставлен)</button>;
 }
-item.innerHTML = <div class="card-row"> <span class="order-number">Заказ №${order.orderNumber}</span> <span class="order-price">${order.financials.total} ₽</span> </div> <div class="card-row" style="color: var(--text-muted); font-size: 0.9rem;"> <span>Покупатель: ${order.customer.name} (${order.customer.phone})</span> </div> <div class="card-row" style="margin-top: 6px; font-size: 0.85rem;"> <span>📍 ${order.customer.address}</span> </div> <div class="item-row-display">📋 ${order.details || 'Не указано'}</div> <div class="card-row" style="margin-top: 12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"> <span class="emp-role">Статус: ${translateStatusName(order.status)}</span> ${selectHtml} </div>;
+item.innerHTML =  <div class="card-row"> <span class="order-number">Заказ №${order.orderNumber}</span> <span class="order-price">${order.financials.total} ₽</span> </div> <div class="card-row" style="color: var(--text-muted); font-size: 0.9rem;"> <span>Покупатель: ${order.customer.name} (${order.customer.phone})</span> </div> <div class="card-row" style="margin-top: 6px; font-size: 0.85rem;"> <span>📍 ${order.customer.address}</span> </div> <div class="item-row-display">📋 ${order.details || 'Не указано'}</div> <div class="card-row" style="margin-top: 12px; border-top:1px solid rgba(255,255,255,0.05); padding-top:10px;"> <span class="emp-role">Статус: ${translateStatusName(order.status)}</span> ${selectHtml} </div>;
 feed.appendChild(item);
 });
 });
@@ -263,10 +114,10 @@ container.innerHTML = <div class="tab-header"><h2>Учет цветка и ос�
 
 Название цветка / зелени
 Количество (шт / упак)
-Минимальный остаток (оповещение критического уровня)
+Минимальный остаток (оповещение)
 Принять на склад
 
-: ''} <div class="inventory-grid" id="inv-display">Загрузка склада...</div>;
+ : ''} <div class="inventory-grid" id="inv-display">Загрузка склада...</div>;
 if(document.getElementById('inv-form')) {
 document.getElementById('inv-form').addEventListener('submit', createInventoryItem);
 }
@@ -283,12 +134,12 @@ item.innerHTML = <div> <div style="font-weight:600; font-size:1.05rem;">${data.n
 
 -1
 +1
-: ''} </div>;
+ : ''} </div>;
 grid.appendChild(item);
 });
 });
 } else if (tabName === 'admin' && AppState.currentRole === 'admin') {
-container.innerHTML = <div class="tab-header"><h2>Управление персоналом</h2></div> <div class="form-card"> <h3>Зарегистрировать сотрудника</h3> <form id="employee-form"> <div class="input-group"><label>Имя и Фамилия</label><input type="text" id="emp-name" required placeholder="Ольга Сидорова"></div> <div class="input-group"><label>Рабочий Email</label><input type="email" id="emp-email" required placeholder="olga@alliumflower.ru"></div> <div class="input-group"><label>Пароль для входа</label><input type="text" id="emp-pass" required placeholder="минимум 6 знаков"></div> <div class="input-group"><label>Роль в магазине</label> <select id="emp-role"> <option value="operator">Оператор / Менеджер</option> <option value="florist">Флорист</option> <option value="courier">Курьер</option> </select> </div> <button type="submit" class="btn-primary">Добавить в систему</button> </form> </div> <div id="employees-list">Загрузка списка команды...</div>;
+container.innerHTML =  <div class="tab-header"><h2>Управление персоналом</h2></div> <div class="form-card"> <h3>Зарегистрировать сотрудника</h3> <form id="employee-form"> <div class="input-group"><label>Имя и Фамилия</label><input type="text" id="emp-name" required></div> <div class="input-group"><label>Рабочий Email</label><input type="email" id="emp-email" required></div> <div class="input-group"><label>Пароль для входа</label><input type="text" id="emp-pass" required></div> <div class="input-group"><label>Роль в магазине</label> <select id="emp-role"> <option value="operator">Оператор / Менеджер</option> <option value="florist">Флорист</option> <option value="courier">Курьер</option> </select> </div> <button type="submit" class="btn-primary">Добавить в систему</button> </form> </div> <div id="employees-list">Загрузка списка команды...</div>;
 document.getElementById('employee-form').addEventListener('submit', createEmployee);
 db.collection('employees').onSnapshot(snap => {
 const list = document.getElementById('employees-list');
@@ -298,7 +149,7 @@ snap.forEach(doc => {
 const emp = doc.data();
 const item = document.createElement('div');
 item.className = 'employee-item';
-item.innerHTML = <div> <div style="font-weight:600;">${emp.name}</div> <div style="color:var(--text-muted); font-size:0.85rem;">${emp.email}</div> </div> <div> <span class="emp-role" style="margin-right:15px;">${translateRole(emp.role)}</span> <button onclick="toggleEmployeeStatus('${doc.id}', ${!emp.isActive})" class="btn-action"> ${emp.isActive ? '🔴 Отключить' : '🟢 Включить'} </button> </div>;
+item.innerHTML =  <div> <div style="font-weight:600;">${emp.name}</div> <div style="color:var(--text-muted); font-size:0.85rem;">${emp.email}</div> </div> <div> <span class="emp-role" style="margin-right:15px;">${translateRole(emp.role)}</span> <button onclick="toggleEmployeeStatus('${doc.id}', ${!emp.isActive})" class="btn-action"> ${emp.isActive ? '🔴 Отключить' : '🟢 Включить'} </button> </div>;
 list.appendChild(item);
 });
 });

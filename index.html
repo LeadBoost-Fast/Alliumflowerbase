@@ -425,4 +425,5 @@ document.addEventListener("click",e=>{const g=e.target.closest('[data-a="goto"]'
 matchMedia("(min-width:900px)").addEventListener("change",()=>{if(S)draw()});
 document.addEventListener("focusin",e=>{const i=e.target;if(i.matches&&i.matches("input[type=number]")&&i.value==="0"){i.value="";i.dataset.z="1"}});
 document.addEventListener("focusout",e=>{const i=e.target;if(i.matches&&i.matches("input[type=number]")&&i.dataset.z==="1"){if(i.value==="")i.value="0";delete i.dataset.z;i.dispatchEvent(new Event("input",{bubbles:true}))}});
+new MutationObserver(ms=>ms.forEach(m=>m.addedNodes.forEach(n=>{if(n.nodeType!==1)return;(n.matches("input[type=number]")?[n]:[...n.querySelectorAll("input[type=number]")]).forEach(i=>{if(i.value==="0"){i.value="";i.placeholder="0"}})}))).observe(document.body,{childList:true,subtree:true});
 </script></body></html>

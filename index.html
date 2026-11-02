@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -5,13 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>Alliumflower ERP</title>
 
-    <!-- Загрузка официальных библиотек Firebase -->
+    <!-- Подключаем официальное стабильное ядро Firebase -->
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
     <script src="https://gstatic.com"></script>
 
     <script>
-        // Интегрированные параметры вашей базы данных Alliumshop
+        // Персональные ключи связи с вашей базой данных Alliumshop
         const firebaseConfig = {
             apiKey: "AIzaSyAjvGmsPZSJGc0bnlsg9s4mntXuReBQM1E",
             authDomain: "://firebaseapp.com",
@@ -23,7 +24,7 @@
             measurementId: "G-4E4E1EG9FJ"
         };
 
-        // Мгновенная инициализация сервисов
+        // Мгновенная инициализация при чтении файла браузером
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.firestore();
@@ -103,6 +104,7 @@
 </head>
 <body>
 
+    <!-- Окно входа -->
     <div id="auth-screen" class="auth-screen">
         <div class="auth-card">
             <h2>Alliumflower</h2>
@@ -122,6 +124,7 @@
         </div>
     </div>
 
+    <!-- Главная рабочая панель -->
     <div id="app-container" class="app-container hidden">
         <header class="app-header">
             <div>
@@ -143,7 +146,7 @@
     <script>
         const AppState = { currentUser: null, currentRole: null, activeTab: 'orders' };
 
-        // Слушатель авторизации (Синхронизирован с автоматической коллекцией employees)
+        // Главный слушатель сессии авторизации
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 try {
@@ -153,7 +156,8 @@
                         AppState.currentRole = doc.data().role;
                         initInterface();
                     } else {
-alert('Доступ заблокирован. Вас нет в базе данных сотрудников.');
+
+alert('Доступ заблокирован. Вас нет в базе данных сотрудников employees.');
 auth.signOut();
 }
 } catch (e) {
@@ -165,19 +169,21 @@ document.getElementById('app-container').classList.add('hidden');
 document.getElementById('auth-screen').classList.remove('hidden');
 }
 });
-// Форма входа
+// Отправка формы логина
 document.getElementById('auth-form').addEventListener('submit', (e) => {
 e.preventDefault();
 const email = document.getElementById('auth-email').value;
 const password = document.getElementById('auth-password').value;
 auth.signInWithEmailAndPassword(email, password).catch(err => alert('Ошибка входа: ' + err.message));
 });
-// Кнопка автосоздания правильного админа в чистую базу данных
+// Прямое развертывание вашего аккаунта администратора в чистую базу
 document.getElementById('btn-auto-admin').addEventListener('click', async () => {
 const email = "nash0082008@icloud.com";
 const pass = "2020Mansur";
 try {
+// Создаем учетную запись в Authentication
 const cred = await auth.createUserWithEmailAndPassword(email, pass);
+// Мгновенно пишем документ прав в коллекцию employees
 await db.collection('employees').doc(cred.user.uid).set({
 name: "Главный Администратор",
 email: email,
@@ -185,22 +191,9 @@ role: "admin",
 isActive: true,
 createdAt: new Date().toISOString()
 });
-alert("Успешно создано в новой чистой базе!\nТеперь вводите ваши данные для входа.");
+alert("Успешно создано в облаке!\nТеперь введите ваши данные в форму входа.");
 } catch(err) {
-if (err.code === "auth/email-already-in-use") {
-// Если в Authentication юзер остался, просто заново пишем документ в чистый Firestore
-const user = auth.currentUser || (await auth.signInWithEmailAndPassword(email, pass)).user;
-await db.collection('employees').doc(user.uid).set({
-name: "Главный Администратор",
-email: email,
-role: "admin",
-isActive: true,
-createdAt: new Date().toISOString()
-});
-alert("Профиль восстановлен в базе данных! Вводите логин и пароль.");
-} else {
-alert("Ошибка: " + err.message);
-}
+alert("Ошибка создания: " + err.message + "\nУбедитесь, что правила Firestore опубликованы.");
 }
 });
 document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());

@@ -1,1 +1,291 @@
+<!doctype html>
+<html lang="ru" data-theme="dark">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#101014">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<title>Alliumflower</title>
+<style>
+:root{--bg:#101014;--panel:#1b1b22;--panel2:#24242d;--ink:#f5f4f8;--muted:#a3a0ad;--line:#34333e;--accent:#b99aff;--on:#17121f;--good:#53d58a;--bad:#ff777e;--warn:#f2bd65;--nav:#17171de8}
+[data-theme=light]{--bg:#f4f2f8;--panel:#fff;--panel2:#ece9f3;--ink:#1c1a22;--muted:#6c6877;--line:#d9d5e2;--accent:#7b4fd0;--on:#fff;--nav:#ffffffe8}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--ink);font:15px -apple-system,BlinkMacSystemFont,"SF Pro Display",system-ui,sans-serif;padding:env(safe-area-inset-top) 0 calc(88px + env(safe-area-inset-bottom))}
+button,input,select,textarea{font:inherit}button{cursor:pointer}
+.shell{max-width:760px;margin:auto;padding:16px}
+header{display:flex;justify-content:space-between;align-items:center;margin:8px 0 18px}
+.brand{font-size:25px;font-weight:750;letter-spacing:-.8px}.brand span{color:var(--accent)}
+.sub{color:var(--muted);font-size:12px;margin-top:3px}
+.btn,.iconbtn{border:0;border-radius:14px;padding:11px 15px;background:var(--accent);color:var(--on);font-weight:700;transition:.15s}
+.btn:active{transform:scale(.97)}
+.iconbtn,.btn.secondary{background:var(--panel2);color:var(--ink)}
+.btn.danger{background:#48252b;color:#ffb6bb}
+.btn:disabled{opacity:.45}
+.card,.order{background:var(--panel);border:1px solid var(--line);border-radius:19px;padding:16px;margin:12px 0;box-shadow:0 6px 20px #0002}
+.order{padding:14px;margin:9px 0;cursor:pointer;animation:in .2s}
+@keyframes in{from{opacity:0;transform:translateY(6px)}}
+h1{font-size:24px;margin:0 0 6px}h2{font-size:13px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:22px 2px 10px}h3{font-size:16px;margin:0}
+p{line-height:1.5}.muted,.small{color:var(--muted)}.small{font-size:12px}
+label{display:block;color:var(--muted);font-size:13px;margin:12px 0 6px}
+input,select,textarea{width:100%;border:1px solid var(--line);background:var(--bg);color:var(--ink);border-radius:12px;padding:12px;min-height:45px}
+textarea{min-height:70px;resize:vertical}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px}.stat{background:var(--panel2);border-radius:15px;padding:13px;min-width:0}.stat b{display:block;font-size:20px}.stat span{font-size:11px;color:var(--muted)}
+.nav{position:fixed;z-index:5;bottom:0;left:0;right:0;padding:8px 10px calc(8px + env(safe-area-inset-bottom));display:flex;justify-content:center;gap:7px;background:var(--nav);backdrop-filter:blur(22px);-webkit-backdrop-filter:blur(22px);border-top:1px solid var(--line)}
+.nav button{flex:1;max-width:180px;border:0;border-radius:12px;padding:11px 4px;background:transparent;color:var(--muted);font-size:12px}.nav button.active{background:var(--panel2);color:var(--accent);font-weight:700}
+.badge{display:inline-block;border-radius:99px;background:var(--panel2);color:var(--accent);font-size:11px;padding:5px 9px;white-space:nowrap}
+.badge.bad{color:var(--bad)}.badge.good{color:var(--good)}
+.meta{font-size:12px;color:var(--muted);line-height:1.6;margin-top:5px}
+.actions{display:flex;gap:7px;flex-wrap:wrap;margin-top:12px}.actions button{flex:1;min-width:110px}
+.kv{display:flex;justify-content:space-between;gap:12px;padding:8px 0;border-bottom:1px solid var(--line);font-size:14px}.kv span:first-child{color:var(--muted)}.kv span:last-child{text-align:right}
+.empty{text-align:center;color:var(--muted);padding:30px 12px}.hidden{display:none!important}
+#toast{position:fixed;left:50%;bottom:100px;transform:translateX(-50%);background:#eee;color:#17121f;border-radius:13px;padding:11px 16px;z-index:20;max-width:90%;box-shadow:0 8px 30px #0008}
+#busy{position:fixed;inset:0;background:#09090dcc;display:grid;place-items:center;z-index:30;color:#fff}
+@media(max-width:480px){.grid{grid-template-columns:1fr}.shell{padding:13px}.stats{gap:6px}.stat b{font-size:17px}}
+</style>
+</head>
+<body>
+<div class="shell">
+<header><div><div class="brand">Allium<span>flower</span></div><div class="sub" id="headerSub">Управление цветочным магазином</div></div>
+<button class="iconbtn hidden" id="logoutBtn">Выйти</button></header>
+<main id="app"><div class="empty">Загрузка…</div></main>
+</div>
+<nav class="nav hidden" id="nav">
+<button data-tab="home" class="active">Главная</button><button data-tab="orders">Заказы</button><button data-tab="staff" id="staffTab">Персонал</button><button data-tab="profile">Профиль</button>
+</nav>
+<div id="toast" class="hidden"></div><div id="busy" class="hidden">Подождите…</div>
 
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-auth-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
+<script>
+"use strict";
+const firebaseConfig={apiKey:"AIzaSyAAEXuWjjElAfRsANJjlHgAtvoTVtHJ2WA",authDomain:"alliumflower-9cd6b.firebaseapp.com",projectId:"alliumflower-9cd6b",storageBucket:"alliumflower-9cd6b.firebasestorage.app",messagingSenderId:"349951323253",appId:"1:349951323253:web:9359203d3aa658c77e1c3c",measurementId:"G-KJVZF5Y23G"};
+firebase.initializeApp(firebaseConfig);
+const auth=firebase.auth(),db=firebase.firestore(),FV=firebase.firestore.FieldValue,TS=()=>FV.serverTimestamp();
+const $=id=>document.getElementById(id);
+const esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+const money=n=>Math.round(Number(n)||0).toLocaleString("ru-RU")+" ₸";
+const iso=d=>new Date(d.getTime()-d.getTimezoneOffset()*6e4).toISOString().slice(0,10);
+const today=()=>iso(new Date());
+const STAT=["Новый","Собирается","Готов","В пути","Выдан"];
+const ROLES={admin:"Администратор",operator:"Оператор",florist:"Флорист",courier:"Курьер"};
+let user=null,staff=null,orders=[],couriers=[],tab="home",detailId=null,formOrder=null,unsub=null,F={q:"",st:"",pay:"",date:""},inflight=false;
+
+const toast=m=>{$("toast").textContent=m;$("toast").classList.remove("hidden");clearTimeout(toast.t);toast.t=setTimeout(()=>$("toast").classList.add("hidden"),3500)};
+const busy=v=>$("busy").classList.toggle("hidden",!v);
+const isOp=()=>["admin","operator"].includes(staff?.role);
+const total=o=>(Number(o.p)||0)+(Number(o.fee)||0);
+const paidOf=o=>o.paidAmount!=null?Number(o.paidAmount):(o.paid?total(o):0);
+const rest=o=>Math.max(0,total(o)-paidOf(o));
+const stName=o=>o.cancelled?"Отменён":(STAT[+o.st]||"—");
+const validPhone=p=>{const d=p.replace(/\D/g,"");return d.length>=10&&d.length<=15};
+const FBERR={"permission-denied":"Недостаточно прав (проверьте правила Firestore)","unavailable":"Нет связи с сервером","failed-precondition":"Нужен индекс или условие не выполнено","unauthenticated":"Нужно войти заново"};
+const fbErr=e=>FBERR[e.code]||("Ошибка: "+(e.code||e.message));
+
+/* тема */
+function setTheme(t){document.documentElement.dataset.theme=t;try{localStorage.setItem("af_theme",t)}catch(e){}document.querySelector('meta[name=theme-color]').content=t==="dark"?"#101014":"#f4f2f8"}
+(()=>{let t=null;try{t=localStorage.getItem("af_theme")}catch(e){}setTheme(t||(matchMedia("(prefers-color-scheme: light)").matches?"light":"dark"))})();
+
+/* вход */
+const AUTHERR={"auth/invalid-credential":"Неверный email или пароль","auth/user-not-found":"Пользователь не найден","auth/wrong-password":"Неверный пароль","auth/too-many-requests":"Слишком много попыток, попробуйте позже","auth/network-request-failed":"Проверьте интернет","auth/invalid-email":"Некорректный email","auth/user-disabled":"Учётная запись отключена","auth/email-already-in-use":"Такой email уже занят","auth/weak-password":"Пароль слишком короткий (минимум 6 символов)"};
+const authErr=e=>AUTHERR[e.code]||("Ошибка: "+(e.code||e.message));
+function showLogin(){
+ $("nav").classList.add("hidden");$("logoutBtn").classList.add("hidden");$("headerSub").textContent="Управление цветочным магазином";
+ $("app").innerHTML=`<section class="card"><h1>Вход</h1><p class="muted">Войдите рабочей учётной записью.</p>
+ <form id="lf"><label>Email</label><input id="email" type="email" autocomplete="username" required><label>Пароль</label><input id="password" type="password" autocomplete="current-password" required>
+ <button class="btn" style="width:100%;margin-top:15px">Войти</button></form>
+ <button class="btn secondary" id="reset" style="width:100%;margin-top:9px">Забыли пароль?</button></section>`;
+ $("lf").onsubmit=async e=>{e.preventDefault();busy(true);try{await auth.signInWithEmailAndPassword($("email").value.trim(),$("password").value)}catch(x){toast(authErr(x))}finally{busy(false)}};
+ $("reset").onclick=async()=>{const m=$("email").value.trim();if(!m)return toast("Сначала введите email");try{await auth.sendPasswordResetEmail(m);toast("Письмо для сброса отправлено")}catch(x){toast(authErr(x))}};
+}
+function denied(msg){
+ $("nav").classList.add("hidden");$("logoutBtn").classList.remove("hidden");
+ $("app").innerHTML=`<section class="card"><h1>Нет доступа</h1><p>${esc(msg)}</p><p class="muted">Обратитесь к администратору: профиль сотрудника должен быть активен и иметь роль.</p><button class="btn secondary" id="retry">Проверить снова</button></section>`;
+ $("retry").onclick=loadStaff;
+}
+async function loadStaff(){
+ if(!user)return;busy(true);
+ try{
+  const s=await db.collection("staff").doc(user.uid).get();
+  if(!s.exists)return denied("Для вашей учётной записи не создан профиль сотрудника.");
+  staff=s.data();
+  if(staff.active!==true||!ROLES[staff.role])return denied("Профиль отключён или роль не назначена.");
+  $("headerSub").textContent=(staff.name||user.email)+" · "+ROLES[staff.role];
+  $("logoutBtn").classList.remove("hidden");$("nav").classList.remove("hidden");
+  $("staffTab").classList.toggle("hidden",staff.role!=="admin");
+  if(isOp()){try{const c=await db.collection("staff").where("role","==","courier").get();couriers=c.docs.map(d=>({id:d.id,...d.data()})).filter(x=>x.active)}catch(e){couriers=[]}}
+  subscribe();render();
+ }catch(e){denied(e.code==="permission-denied"?"Правила Firestore не разрешают прочитать профиль. Опубликуйте файл firestore.rules.":"Не удалось загрузить профиль: "+fbErr(e))}
+ finally{busy(false)}
+}
+function subscribe(){
+ if(unsub)unsub();
+ const col=db.collection("orders");
+ const q=staff.role==="courier"?col.where("courier","==",user.uid).limit(300):col.orderBy("ts","desc").limit(300);
+ unsub=q.onSnapshot(s=>{orders=s.docs.map(d=>({id:d.id,...d.data()})).sort((a,b)=>(b.ts||0)-(a.ts||0));if(!formOrder&&tab!=="staff"&&tab!=="profile")render()},e=>toast("Ошибка загрузки заказов: "+fbErr(e)));
+}
+
+/* логика статусов */
+function nextSt(o){if(o.cancelled||+o.st>=4)return null;return(+o.st===2&&!o.dv)?4:+o.st+1}
+function canAdvance(o){const n=nextSt(o);if(n==null)return false;const r=staff.role;if(isOp())return true;if(r==="florist")return +o.st<=1;if(r==="courier")return +o.st===3;return false}
+function nextLabel(o){const s=+o.st;return s===0?"Начать сборку":s===1?"Отметить готовым":s===2?(o.dv?"Передать курьеру":"Выдать клиенту"):"Вручено"}
+function logTo(b,orderId,action,text){b.set(db.collection("activityLogs").doc(),{orderId,action,text,by:user.uid,byName:staff.name||"Сотрудник",ts:TS()})}
+
+/* отображение */
+function render(){
+ if(!staff)return;
+ document.querySelectorAll("#nav button").forEach(b=>b.classList.toggle("active",b.dataset.tab===tab));
+ if(formOrder)return renderForm();
+ if(detailId)return renderDetail();
+ ({home:renderHome,orders:renderOrders,staff:renderStaff,profile:renderProfile})[tab]();
+}
+function card(o){
+ const left=rest(o);
+ return`<article class="order" data-open="${esc(o.id)}"><div class="row"><h3>${esc(o.bn||"Заказ")} · ${money(total(o))}</h3><span class="badge ${o.cancelled?"bad":""}">${esc(stName(o))}</span></div>
+ <div class="meta">${esc(o.client||"")} ${isOp()||staff.role==="courier"?"· "+esc(o.phone||""):""}<br>${esc(o.date||"")} ${esc(o.time||"")} · ${o.dv?"Доставка: "+esc(o.addr||""):"Самовывоз"}
+ ${isOp()?`<br>${left>0&&!o.cancelled?`<span style="color:var(--warn)">К оплате: ${money(left)}</span>`:"Оплачен"}`:""}</div></article>`;
+}
+function bindOpen(){document.querySelectorAll("[data-open]").forEach(e=>e.onclick=()=>{detailId=e.dataset.open;render()})}
+function renderHome(){
+ const live=orders.filter(o=>!o.cancelled),cnt=s=>live.filter(o=>+o.st===s).length;
+ const week=iso(new Date(Date.now()-6*864e5)),month=today().slice(0,8)+"01";
+ const rev=from=>orders.filter(o=>!o.cancelled&&o.date>=from).reduce((s,o)=>s+paidOf(o),0);
+ const unpaid=live.filter(o=>rest(o)>0),debt=unpaid.reduce((s,o)=>s+rest(o),0);
+ const paidOrders=live.filter(o=>paidOf(o)>0),avg=paidOrders.length?paidOrders.reduce((s,o)=>s+total(o),0)/paidOrders.length:0;
+ const soon=live.filter(o=>o.dv&&+o.st<4).sort((a,b)=>((a.date||"")+(a.time||"")).localeCompare((b.date||"")+(b.time||""))).slice(0,5);
+ $("app").innerHTML=`<h1>Здравствуйте, ${esc(staff.name||"сотрудник")}</h1>
+ <div class="stats"><div class="stat"><b>${cnt(0)}</b><span>Новые</span></div><div class="stat"><b>${cnt(1)}</b><span>Собираются</span></div><div class="stat"><b>${cnt(2)}</b><span>Готовы</span></div>
+ <div class="stat"><b>${cnt(3)}</b><span>В пути</span></div><div class="stat"><b>${cnt(4)}</b><span>Выданы</span></div><div class="stat"><b>${orders.length-live.length}</b><span>Отменены</span></div></div>
+ ${isOp()?`<h2>Деньги (получено)</h2><div class="stats"><div class="stat"><b>${money(rev(today()))}</b><span>Сегодня</span></div><div class="stat"><b>${money(rev(week))}</b><span>7 дней</span></div><div class="stat"><b>${money(rev(month))}</b><span>Месяц</span></div>
+ <div class="stat"><b>${unpaid.length}</b><span>Неоплачено</span></div><div class="stat"><b>${money(debt)}</b><span>Долги клиентов</span></div><div class="stat"><b>${money(avg)}</b><span>Средний чек</span></div></div>
+ <p class="small">Расходы, прибыль и склад появятся на следующих этапах. Считаются последние 300 заказов.</p>`:""}
+ <h2>Ближайшие доставки</h2>${soon.map(card).join("")||'<div class="empty">Доставок нет</div>'}
+ ${isOp()?'<button class="btn" style="width:100%;margin-top:12px" id="nb">＋ Новый заказ</button>':""}`;
+ bindOpen();if($("nb"))$("nb").onclick=()=>{formOrder={}; render()};
+}
+function filtered(){const q=F.q.toLowerCase();return orders.filter(o=>(F.st===""||(F.st==="x"?o.cancelled:(!o.cancelled&&String(o.st)===F.st)))&&(!F.pay||(F.pay==="p"?rest(o)===0:rest(o)>0))&&(!F.date||o.date===F.date)&&(`${o.client||""} ${o.phone||""} ${o.bn||""}`).toLowerCase().includes(q))}
+function renderOrders(){
+ $("app").innerHTML=`<div class="row"><h1>Заказы</h1>${isOp()?'<button class="btn" id="nb">＋ Заказ</button>':""}</div>
+ <input id="q" placeholder="Поиск: имя, телефон, букет" value="${esc(F.q)}" style="margin:10px 0">
+ <div class="grid"><select id="fs"><option value="">Все статусы</option>${STAT.map((s,i)=>`<option value="${i}">${s}</option>`).join("")}<option value="x">Отменённые</option></select>
+ <select id="fp"><option value="">Любая оплата</option><option value="p">Оплачены</option><option value="u">Не оплачены</option></select></div>
+ <input id="fd" type="date" value="${esc(F.date)}" style="margin-top:10px"><div id="list"></div>`;
+ $("fs").value=F.st;$("fp").value=F.pay;
+ const upd=()=>{F.q=$("q").value;F.st=$("fs").value;F.pay=$("fp").value;F.date=$("fd").value;const l=filtered();$("list").innerHTML=l.map(card).join("")||'<div class="empty">Ничего не найдено</div>';bindOpen()};
+ ["q","fs","fp","fd"].forEach(i=>$(i).oninput=upd);upd();
+ if($("nb"))$("nb").onclick=()=>{formOrder={};render()};
+}
+
+/* карточка заказа */
+async function renderDetail(){
+ const o=orders.find(x=>x.id===detailId);if(!o){detailId=null;return render()}
+ const kv=(k,v)=>v||v===0?`<div class="kv"><span>${k}</span><span>${v}</span></div>`:"";
+ const adv=canAdvance(o);
+ $("app").innerHTML=`<div class="row"><button class="iconbtn" id="back">← Назад</button><span class="badge ${o.cancelled?"bad":""}">${esc(stName(o))}</span></div>
+ <section class="card"><h1>${esc(o.bn||"Заказ")}</h1><p class="small">Заказ №${esc(o.num||"—")}</p>
+ ${kv("Клиент",esc(o.client))}${kv("Телефон",esc(o.phone))}${kv("Состав",esc(o.items))}${kv("Дата и время готовности",esc((o.date||"")+" "+(o.time||"")))}
+ ${kv("Получение",o.dv?"Доставка":"Самовывоз")}${o.dv?kv("Адрес",esc(o.addr)):""}${o.dv?kv("Курьер",esc(o.courierName||"не назначен")):""}
+ ${isOp()?kv("Букет",money(o.p))+(o.dv?kv("Доставка",money(o.fee))+kv("Оплата курьеру",money(o.cpay)):"")+kv("Итого",money(total(o)))+kv("Оплачено",money(paidOf(o)))+kv("Остаток к оплате",money(rest(o)))+kv("Способ оплаты",esc(o.pay)):(staff.role==="courier"?kv("Получить с клиента",money(rest(o)))+kv("Оплата курьеру",money(o.cpay)):"")}
+ ${kv("Источник",esc(o.src))}${kv("Текст открытки",esc(o.card))}${kv("Комментарий",esc(o.note))}${o.cancelled?kv("Причина отмены",esc(o.cancelReason)):""}
+ <div class="actions">${adv?`<button class="btn" id="adv">${nextLabel(o)}</button>`:""}
+ ${isOp()&&!o.cancelled&&rest(o)>0?'<button class="btn secondary" id="pay">Принять оплату</button>':""}
+ ${isOp()&&!o.cancelled?'<button class="btn secondary" id="edit">Изменить</button>':""}
+ ${isOp()?'<button class="btn secondary" id="rep">Повторить</button>':""}
+ <button class="btn secondary" id="copy">Копировать</button>
+ ${isOp()&&!o.cancelled&&+o.st<4?'<button class="btn danger" id="cancel">Отменить заказ</button>':""}</div></section>
+ ${isOp()?'<h2>История изменений</h2><div class="card" id="hist"><span class="muted">Загрузка…</span></div>':""}`;
+ $("back").onclick=()=>{detailId=null;render()};
+ if($("adv"))$("adv").onclick=()=>advance(o);
+ if($("pay"))$("pay").onclick=()=>takePayment(o);
+ if($("edit"))$("edit").onclick=()=>{formOrder={...o,_edit:true};render()};
+ if($("rep"))$("rep").onclick=()=>{const{id,num,st,ts,paidAmount,paid,cancelled,cancelReason,date,time,...r}=o;formOrder={...r,prepay:0};render()};
+ $("copy").onclick=()=>{const t=`Заказ №${o.num||""}: ${o.bn||""}\nКлиент: ${o.client||""} ${o.phone||""}\n${o.dv?"Доставка: "+(o.addr||""):"Самовывоз"}\nГотовность: ${o.date||""} ${o.time||""}\nСостав: ${o.items||""}\nИтого: ${money(total(o))}, остаток: ${money(rest(o))}`;(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>toast("Скопировано"),()=>toast("Не удалось скопировать"))};
+ if($("cancel"))$("cancel").onclick=()=>cancelOrder(o);
+ if(isOp()){try{const s=await db.collection("activityLogs").where("orderId","==",o.id).get();const l=s.docs.map(d=>d.data()).sort((a,b)=>(b.ts?.seconds||0)-(a.ts?.seconds||0));
+  if($("hist"))$("hist").innerHTML=l.map(x=>`<div class="kv"><span>${x.ts?new Date(x.ts.seconds*1000).toLocaleString("ru-RU",{day:"numeric",month:"short",hour:"2-digit",minute:"2-digit"}):"…"} · ${esc(x.byName)}</span><span>${esc(x.text)}</span></div>`).join("")||'<span class="muted">Записей нет</span>'}catch(e){if($("hist"))$("hist").textContent="История недоступна: "+fbErr(e)}}
+}
+async function run(fn){if(inflight)return;inflight=true;busy(true);try{await fn()}catch(e){toast(fbErr(e))}finally{inflight=false;busy(false)}}
+const advance=o=>run(async()=>{
+ const n=nextSt(o);if(o.dv&&+o.st===2&&!o.courier)throw{message:"Сначала назначьте курьера (кнопка «Изменить»)"};
+ const b=db.batch();b.update(db.collection("orders").doc(o.id),{st:n,statusBy:user.uid,updatedAt:TS()});logTo(b,o.id,"status","Статус: "+STAT[n]);await b.commit();toast("Статус: "+STAT[n])});
+const takePayment=o=>{const v=prompt("Сумма оплаты, ₸ (остаток "+rest(o)+")",rest(o));if(v===null)return;const a=Math.round(Number(v));if(!(a>0)||a>rest(o))return toast("Некорректная сумма");
+ run(async()=>{const b=db.batch();b.set(db.collection("payments").doc(),{orderId:o.id,amount:a,method:o.pay||"",by:user.uid,byName:staff.name||"",ts:TS()});
+  b.update(db.collection("orders").doc(o.id),{paidAmount:paidOf(o)+a,paid:rest(o)-a<=0,updatedAt:TS()});logTo(b,o.id,"payment","Принята оплата "+money(a));await b.commit();toast("Оплата принята")})};
+const cancelOrder=o=>{const r=prompt("Причина отмены:");if(r===null)return;if(!r.trim())return toast("Укажите причину");
+ run(async()=>{const b=db.batch();b.update(db.collection("orders").doc(o.id),{cancelled:true,cancelReason:r.trim(),updatedAt:TS()});logTo(b,o.id,"cancel","Заказ отменён: "+r.trim());await b.commit();toast("Заказ отменён")})};
+
+/* форма заказа */
+function renderForm(){
+ const o=formOrder,ed=!!o._edit;
+ if(!o._id)o._id=ed?o.id:db.collection("orders").doc().id;
+ const v=(k,d="")=>esc(o[k]??d);
+ const opt=(arr,cur)=>arr.map(a=>`<option ${a===cur?"selected":""}>${a}</option>`).join("");
+ $("app").innerHTML=`<section class="card"><div class="row"><h1>${ed?"Изменить заказ":"Новый заказ"}</h1><button class="iconbtn" id="x">Закрыть</button></div>
+ <form id="of"><div class="grid"><div><label>Имя клиента *</label><input name="client" required value="${v("client")}"></div><div><label>Телефон *</label><input name="phone" type="tel" required placeholder="+7 777 123 45 67" value="${v("phone")}"></div></div>
+ <label>Название букета *</label><input name="bn" required value="${v("bn")}">
+ <label>Состав букета</label><textarea name="items">${v("items")}</textarea>
+ <div class="grid"><div><label>Цена букета, ₸ *</label><input name="p" type="number" min="0" required value="${v("p")}"></div><div><label>Предоплата, ₸</label><input name="prepay" type="number" min="0" value="${ed?"":v("prepay",0)}" ${ed?"disabled placeholder='через «Принять оплату»'":""}></div></div>
+ <div class="grid"><div><label>Дата готовности *</label><input name="date" type="date" required value="${v("date",today())}"></div><div><label>Время</label><input name="time" type="time" value="${v("time")}"></div></div>
+ <div class="grid"><div><label>Получение</label><select name="dv"><option value="false">Самовывоз</option><option value="true" ${o.dv?"selected":""}>Доставка</option></select></div>
+ <div><label>Источник</label><select name="src">${opt(["Instagram","WhatsApp","2ГИС","Телефон","Другое"],o.src)}</select></div></div>
+ <div id="dvbox"><label>Адрес доставки</label><input name="addr" value="${v("addr")}">
+ <div class="grid"><div><label>Стоимость доставки, ₸</label><input name="fee" type="number" min="0" value="${v("fee",0)}"></div><div><label>Оплата курьеру, ₸</label><input name="cpay" type="number" min="0" value="${v("cpay",0)}"></div></div>
+ <label>Курьер</label><select name="courier"><option value="">Не назначен</option>${couriers.map(c=>`<option value="${esc(c.id)}" ${c.id===o.courier?"selected":""}>${esc(c.name||c.email||"Курьер")}</option>`).join("")}</select></div>
+ <label>Способ оплаты</label><select name="pay">${opt(["Kaspi","Наличные","Перевод"],o.pay)}</select>
+ <label>Текст открытки</label><textarea name="card">${v("card")}</textarea><label>Комментарий</label><textarea name="note">${v("note")}</textarea>
+ <button class="btn" id="save" style="width:100%;margin-top:15px">${ed?"Сохранить":"Создать заказ"}</button></form></section>`;
+ const f=$("of"),tgl=()=>$("dvbox").classList.toggle("hidden",f.dv.value!=="true");f.dv.onchange=tgl;tgl();
+ $("x").onclick=()=>{formOrder=null;render()};
+ f.onsubmit=e=>{e.preventDefault();
+  const d=Object.fromEntries(new FormData(f).entries()),dv=d.dv==="true";
+  if(!validPhone(d.phone))return toast("Проверьте номер телефона");
+  if(dv&&!d.addr.trim())return toast("Укажите адрес доставки");
+  const p=Math.round(Number(d.p));if(!(p>=0))return toast("Некорректная цена");
+  const sel=f.courier,cn=dv&&sel.value?sel.options[sel.selectedIndex].text:"";
+  const data={client:d.client.trim(),phone:d.phone.trim(),bn:d.bn.trim(),items:d.items.trim(),p,date:d.date,time:d.time,dv,addr:dv?d.addr.trim():"",fee:dv?Math.round(+d.fee)||0:0,cpay:dv?Math.round(+d.cpay)||0:0,src:d.src,pay:d.pay,card:d.card.trim(),note:d.note.trim(),courier:dv?d.courier:"",courierName:cn,updatedAt:TS()};
+  run(async()=>{
+   const ref=db.collection("orders").doc(o._id),b=db.batch();
+   if(ed){const ch=[];if(+o.p!==p)ch.push(`цена ${money(o.p)} → ${money(p)}`);if((o.courier||"")!==data.courier)ch.push("курьер: "+(cn||"снят"));if(o.date!==data.date||(o.time||"")!==data.time)ch.push("время готовности");
+    b.update(ref,data);logTo(b,o._id,ch.some(x=>x.startsWith("цена"))?"price":"edit","Изменён заказ"+(ch.length?": "+ch.join(", "):""));}
+   else{const pre=Math.min(Math.max(Math.round(+d.prepay)||0,0),p+data.fee);
+    b.set(ref,{...data,st:0,cancelled:false,paidAmount:pre,paid:pre>=p+data.fee,num:String(Math.floor(100000+Math.random()*900000)),by:user.uid,ts:Date.now(),createdAt:TS()});
+    if(pre>0)b.set(db.collection("payments").doc(),{orderId:o._id,amount:pre,method:data.pay,by:user.uid,byName:staff.name||"",ts:TS()});
+    logTo(b,o._id,"create","Заказ создан"+(pre>0?", предоплата "+money(pre):""));}
+   await b.commit();toast(ed?"Заказ обновлён":"Заказ создан");formOrder=null;detailId=o._id;tab="orders";render()});
+ };
+}
+
+/* персонал (админ) */
+async function renderStaff(){
+ if(staff.role!=="admin"){tab="home";return render()}
+ $("app").innerHTML=`<h1>Персонал</h1><div id="sl" class="muted">Загрузка…</div>
+ <section class="card"><h3>Новый сотрудник</h3><form id="sf"><label>Имя *</label><input name="name" required><label>Email *</label><input name="email" type="email" required>
+ <label>Пароль (минимум 6 символов) *</label><input name="pw" type="text" minlength="6" required><label>Роль</label><select name="role"><option value="operator">Оператор</option><option value="florist">Флорист</option><option value="courier">Курьер</option><option value="admin">Администратор</option></select>
+ <button class="btn" style="width:100%;margin-top:14px">Создать</button></form></section>`;
+ const load=async()=>{try{const s=await db.collection("staff").get();const l=s.docs.map(d=>({id:d.id,...d.data()}));
+  $("sl").innerHTML=l.map(x=>`<div class="card"><div class="row"><b>${esc(x.name||x.email)}</b><span class="badge ${x.active?"good":"bad"}">${x.active?"Активен":"Отключён"}</span></div><div class="meta">${esc(x.email||"")}</div>
+  <div class="actions"><select data-role="${esc(x.id)}">${Object.entries(ROLES).map(([k,n])=>`<option value="${k}" ${k===x.role?"selected":""}>${n}</option>`).join("")}</select>
+  ${x.id===user.uid?"":`<button class="btn secondary" data-tg="${esc(x.id)}" data-a="${x.active?0:1}">${x.active?"Отключить":"Включить"}</button>`}</div></div>`).join("");
+  document.querySelectorAll("[data-role]").forEach(e=>e.onchange=()=>run(async()=>{await db.collection("staff").doc(e.dataset.role).update({role:e.value});toast("Роль изменена")}));
+  document.querySelectorAll("[data-tg]").forEach(e=>e.onclick=()=>run(async()=>{await db.collection("staff").doc(e.dataset.tg).update({active:e.dataset.a==="1"});toast("Готово");await load()}))
+ }catch(e){$("sl").textContent="Не удалось загрузить: "+fbErr(e)}};
+ load();
+ $("sf").onsubmit=e=>{e.preventDefault();const d=Object.fromEntries(new FormData($("sf")).entries());
+  run(async()=>{let sec;try{sec=firebase.initializeApp(firebaseConfig,"sec"+Date.now());const c=await sec.auth().createUserWithEmailAndPassword(d.email.trim(),d.pw);
+   await db.collection("staff").doc(c.user.uid).set({name:d.name.trim(),email:d.email.trim(),role:d.role,active:true,createdAt:TS()});await sec.auth().signOut();toast("Сотрудник создан");$("sf").reset();await load()}
+   catch(x){toast(x.code&&x.code.startsWith("auth/")?authErr(x):fbErr(x))}finally{if(sec)await sec.delete()}})};
+}
+function renderProfile(){
+ $("app").innerHTML=`<h1>Профиль</h1><section class="card"><div class="row"><b>${esc(staff.name||"Сотрудник")}</b><span class="badge">${ROLES[staff.role]}</span></div><p class="muted">${esc(user.email||"")}</p>
+ <div class="actions"><button class="btn secondary" id="th">Тема: ${document.documentElement.dataset.theme==="dark"?"тёмная":"светлая"}</button><button class="btn secondary" id="cp">Сменить пароль</button></div></section>`;
+ $("th").onclick=()=>{setTheme(document.documentElement.dataset.theme==="dark"?"light":"dark");renderProfile()};
+ $("cp").onclick=async()=>{try{await auth.sendPasswordResetEmail(user.email);toast("Письмо отправлено")}catch(e){toast(authErr(e))}};
+}
+
+$("nav").addEventListener("click",e=>{const b=e.target.closest("button[data-tab]");if(!b)return;tab=b.dataset.tab;detailId=null;formOrder=null;render()});
+$("logoutBtn").onclick=()=>auth.signOut();
+auth.onAuthStateChanged(async u=>{user=u;staff=null;orders=[];detailId=null;formOrder=null;if(unsub){unsub();unsub=null}if(!u)return showLogin();await loadStaff()});
+</script>
+</body>
+</html>

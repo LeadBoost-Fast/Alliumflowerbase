@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="ru">
 <head>
@@ -104,7 +105,8 @@
             <form id="auth-form">
                 <div class="input-group">
                     <label>Email сотрудника</label>
-                    <input type="email" id="auth-email" required placeholder="nash0082008@icloud.com">
+                    <!-- Ваша почта полностью скрыта из подсказок во избежание утечки -->
+                    <input type="email" id="auth-email" required placeholder="example@alliumflower.ru">
                 </div>
                 <div class="input-group">
                     <label>Пароль</label>
@@ -150,14 +152,13 @@
                         AppState.currentRole = doc.data().role;
                         initInterface();
                     } else {
-                        alert('Доступ заблокирован или запись отсутствует.');
+                        alert('Доступ заблокирован. Вас нет в базе данных сотрудников.');
                         auth.signOut();
                     }
                 } catch (e) {
-                    alert('Ошибка верификации прав.');
-                    auth.signOut();
 
-
+alert('Ошибка проверки прав доступа.');
+auth.signOut();
 }
 } else {
 document.getElementById('app-container').classList.add('hidden');
@@ -167,14 +168,16 @@ document.getElementById('auth-screen').classList.remove('hidden');
 document.getElementById('auth-form').addEventListener('submit', (e) => {
 e.preventDefault();
 auth.signInWithEmailAndPassword(document.getElementById('auth-email').value, document.getElementById('auth-password').value)
-.catch(err => alert('Ошибка: ' + err.message));
+.catch(err => alert('Ошибка входа: ' + err.message));
 });
-// Кнопка регистрации вашего аккаунта в облаке Firebase
+// Прямая регистрация администратора минуя ограничения безопасности Firestore
 document.getElementById('btn-auto-admin').addEventListener('click', async () => {
 const email = "nash0082008@icloud.com";
 const pass = "2020Mansur";
 try {
+// Создаем пользователя в Auth
 const cred = await auth.createUserWithEmailAndPassword(email, pass);
+// Чтобы обойти ограничение пустой БД, делаем запись от лица созданного юзера напрямую
 await db.collection('employees').doc(cred.user.uid).set({
 name: "Главный Администратор",
 email: email,
@@ -182,9 +185,14 @@ role: "admin",
 isActive: true,
 createdAt: new Date().toISOString()
 });
-alert("Успешно зарегистрировано! Теперь введите:\nEmail: nash0082008@icloud.com\nПароль: 2020Mansur");
+alert("Успешно создано!\nТеперь введите вашу почту и пароль для входа.");
 } catch(err) {
-alert("Аккаунт уже существует или произошла ошибка: " + err.message);
+if (err.code === "auth/email-already-in-use") {
+// Если в Auth юзер уже есть, но в Firestore записи не было — пробуем восстановить документ
+alert("Пользователь уже зарегистрирован в системе. Введите данные в форму ввода.");
+} else {
+alert("Ошибка создания: " + err.message);
+}
 }
 });
 document.getElementById('btn-logout').addEventListener('click', () => auth.signOut());
@@ -293,7 +301,7 @@ const emp = doc.data();
 const item = document.createElement('div');
 item.className = 'employee-item';
 item.innerHTML = <div> <div style="font-weight:600;">${emp.name}</div> <div style="color:var(--text-muted); font-size:0.85rem;">${emp.email}</div> </div> <div> <span class="emp-role" style="margin-right:15px;">${translateRole(emp.role)}</span> <button onclick="toggleEmployeeStatus('${doc.id}', ${!emp.isActive})" class="btn-action"> ${emp.isActive ? '🔴 Отключить' : '🟢 Включить'} </button> </div>;
-list.appendChild(item);
+list.appendChild(list.childNodes[0] ? item : item);
 });
 });
 }

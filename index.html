@@ -48,7 +48,7 @@ firebase.initializeApp(cfg);const auth=firebase.auth(),db=firebase.firestore(),T
 const $=i=>document.getElementById(i),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),M=n=>Math.round(+n||0).toLocaleString("ru-RU")+" ₸";
 const ST=["Новый","Собирается","Готов","В пути","Выдан","Отменён"],RL={admin:"Администратор",operator:"Оператор",florist:"Флорист",courier:"Курьер"},SRC=["Instagram","WhatsApp","2ГИС","Телефон","Другое"],PAY=["Kaspi","Наличные","Перевод"];
 let U=null,S=null,O=[],SF={},tab="home",fs="",fq="",subs=[],lock=false;
-const today=()=>new Date().toLocaleDateString("sv-SE"),nm=id=>(SF[id]&&SF[id].name)||"Не назначен",mgr=()=>S&&["admin","operator"].includes(S.role),adm=()=>S&&S.role==="admin";
+const today=()=>new Date().toLocaleDateString("sv-SE"),nm=id=>(SF[id]&&SF[id].name)||"Не назначен",mgr=()=>S&&["admin","operator","florist"].includes(S.role),adm=()=>S&&S.role==="admin";
 const gt=localStorage.getItem("t");if(gt)document.documentElement.dataset.t=gt;
 function toast(t){const e=$("toast");e.textContent=t;e.hidden=false;clearTimeout(toast.t);toast.t=setTimeout(()=>e.hidden=true,3500)}
 function modal(h){$("m").innerHTML=h?`<div class="ov" id="ov"><div class="sh">${h}</div></div>`:"";if(h)$("ov").onclick=e=>{if(e.target.id==="ov")modal("")}}
@@ -81,8 +81,8 @@ auth.onAuthStateChanged(async u=>{U=u;S=null;O=[];SF={};INV=[];BQ=[];LG=[];VS=[]
  subs.push(db.collection("settings").doc("main").onSnapshot(d=>{SH=d.exists?d.data():{};applySet();draw()},e=>toast("Настройки: "+er(e))));
  tab="home";draw()});
 
-function draw(){if(!S)return;const T=[["home","⌂","Главная"],["orders","☰","Заказы"]];if(["admin","florist"].includes(S.role))T.push(["stock","▦","Склад"]);if(["admin","operator","florist"].includes(S.role))T.push(["show","▤","Витрина"]);T.push(["sched","◷","График"]);if(mgr())T.push(["crm","♥","Клиенты"],["leads","✉","Заявки"]);if(adm())T.push(["fin","₸","Финансы"]);if(adm())T.push(["team","☺","Команда"],["jr","✎","Журнал"]);T.push(["me","⚙","Профиль"]);
- const n=$("nav");n.hidden=false;n.dataset.brand=SH.name||"Alliumflower";const wide=matchMedia("(min-width:900px)").matches,pf=({admin:["home","orders","stock","fin"],operator:["home","orders","show","crm"],florist:["home","orders","stock","show"],courier:["home","orders","sched","me"]})[S.role]||[],PR=wide?T:pf.map(k=>T.find(t=>t[0]===k)).filter(Boolean);MORE=wide?[]:T.filter(t=>!pf.includes(t[0]));
+function draw(){if(!S)return;const T=[["home","⌂","Главная"],["orders","☰","Заказы"]];if(["admin","operator","florist"].includes(S.role))T.push(["stock","▦","Склад"]);if(["admin","operator","florist"].includes(S.role))T.push(["show","▤","Витрина"]);T.push(["sched","◷","График"]);if(mgr())T.push(["crm","♥","Клиенты"],["leads","✉","Заявки"]);if(adm())T.push(["fin","₸","Финансы"]);if(adm())T.push(["team","☺","Команда"],["jr","✎","Журнал"]);T.push(["me","⚙","Профиль"]);
+ const n=$("nav");n.hidden=false;n.dataset.brand=SH.name||"Alliumflower";const wide=matchMedia("(min-width:900px)").matches,pf=({admin:["home","orders","stock","fin"],operator:["home","orders","stock","show"],florist:["home","orders","stock","show"],courier:["home","orders","sched","me"]})[S.role]||[],PR=wide?T:pf.map(k=>T.find(t=>t[0]===k)).filter(Boolean);MORE=wide?[]:T.filter(t=>!pf.includes(t[0]));
  const NV=MORE.length?[...PR,["more","⋯","Ещё"]]:PR,inMore=tab==="more"||MORE.some(t=>t[0]===tab);n.innerHTML=NV.map(t=>`<button class="${t[0]===tab||(t[0]==="more"&&inMore)?"on":""}" data-t="${t[0]}"><i>${t[1]}</i>${t[2]}</button>`).join("");
  n.onclick=e=>{const b=e.target.closest("button");if(b){tab=b.dataset.t;draw();scrollTo(0,0)}};
  if(LOC&&!locs().some(x=>x.id===LOC))LOC="";$("v").innerHTML=locBar()+scoped(()=>({home,orders,team,me,stock,show:vit,crm,leads,fin,sched,jr:logv,more:moreV})[tab]())+(mgr()&&(tab==="home"||tab==="orders")?`<button class="btn fab" data-a="new">＋ Заказ</button>`:"");bind()}
@@ -96,7 +96,7 @@ function card(o){const n=next(o),c=+o.st===5?"bad":+o.st===4?"ok":"";
  <div class="row" style="margin-top:8px"><b>${M(+o.p+(+o.fee||0))}</b>${o.paid?'<span class="pill ok">Оплачен</span>':`<span class="pill warn">К оплате ${M(rest(o))}</span>`}</div>
  <div class="acts"><button class="btn g s" data-a="det" data-id="${o.id}">Подробнее</button>${n?`<button class="btn s" data-a="adv" data-id="${o.id}">${n[1]}</button>`:""}</div></div>`}
 
-function home(){if(S.role==="florist")return homeF();if(S.role==="courier")return homeC();const act=O.filter(o=>+o.st<4),c=i=>O.filter(o=>+o.st===i).length,t=today(),yd=addD(t,-1),live=O.filter(o=>+o.st!==5),td=live.filter(o=>o.date===t),yo=live.filter(o=>o.date===yd);
+function home(){if(S.role==="courier")return homeC();const act=O.filter(o=>+o.st<4),c=i=>O.filter(o=>+o.st===i).length,t=today(),yd=addD(t,-1),live=O.filter(o=>+o.st!==5),td=live.filter(o=>o.date===t),yo=live.filter(o=>o.date===yd);
  const money=td.reduce((a,o)=>a+tot(o),0),ym=yo.reduce((a,o)=>a+tot(o),0),up=act.slice().sort((a,b)=>((a.date||"")+(a.time||"")).localeCompare((b.date||"")+(b.time||""))).slice(0,6),
  w7=live.filter(o=>o.date>=addD(t,-6)&&o.date<=t),avg=w7.length?w7.reduce((a,o)=>a+tot(o),0)/w7.length:0,
  tl=(i,x,k)=>`<div class="tile" data-a="tf" data-id="${i}" data-k style="--k:${k}"><b>${c(i)}</b><span>${x}</span></div>`;
@@ -229,7 +229,7 @@ function fin(){const[a,b]=range(),In=x=>x>=a&&x<=b,tot=o=>(+o.p||0)+(+o.fee||0),
  <div class="dg">${finCharts(a,b,os,sold,ex)}${staffRep(os)}</div>
  <div class="card">${L("Долги клиентов",M(un.reduce((s,o)=>s+rest(o),0)))}${L("Неоплаченных заказов",un.length)}${L("Закупки за период (в расходы не входят)",M(pur))}</div><p class="mut">Закупки цветов и упаковки уже учтены через себестоимость при списании, поэтому в расходы не входят. Отменённые заказы в выручку не попадают. Себестоимость берётся из рецепта букета с тем же названием.</p>
  <div class="row"><h2>Расходы за период</h2><button class="btn s" data-a="f_n">＋ Расход</button></div><div class="card">${ex.sort((x,y)=>y.ts-x.ts).map(x=>`<div class="ln"><span>${esc(x.date)} · ${esc(x.cat)}${x.note?" · "+esc(x.note):""}</span><span>${M(x.sum)} <a href="#" data-a="f_x" data-id="${x.id}" style="color:var(--bad)">убрать</a></span></div>`).join("")||'<span class="mut">Расходов нет</span>'}</div>`}
-function staffRep(os){const r=Object.keys(SF).filter(i=>SF[i].active!==false&&["courier","operator","admin"].includes(SF[i].role)).map(id=>{const p=SF[id];
+function staffRep(os){const r=Object.keys(SF).filter(i=>SF[i].active!==false&&["courier","operator","florist","admin"].includes(SF[i].role)).map(id=>{const p=SF[id];
  if(p.role==="courier"){const d=os.filter(o=>+o.st===4&&o.courier===id),f=d.filter(o=>o.proof).length;return d.length?`<div class="ln"><span style="color:var(--ink)">${esc(p.name)}<br><span class="mut">курьер · доставок ${d.length} · с фото ${f} из ${d.length}</span></span><b>${M(d.reduce((a,o)=>a+(+o.cpay||0),0))}</b></div>`:""}
  const d=os.filter(o=>o.by===id);return d.length?`<div class="ln"><span style="color:var(--ink)">${esc(p.name)}<br><span class="mut">${RL[p.role]} · принято заказов ${d.length}</span></span><b>${M(d.reduce((a,o)=>a+tot(o),0))}</b></div>`:""}).join("");
  return card2("Отчёт по сотрудникам за период",r||'<span class="mut">За период данных нет</span>')}
@@ -277,7 +277,7 @@ function alerts(){const now=Date.now(),a=[],c=(n,t,k)=>{if(n)a.push([n,t,k||""])
  if(S.role==="courier")c(O.filter(o=>+o.st===3).length,"доставок в пути у вас");
  else{c(O.filter(o=>+o.st===0).length,"новых заказов");c(O.filter(o=>+o.st===2).length,"заказов готово: выдать или передать курьеру");c(O.filter(o=>o.dv&&+o.st<4&&o.date&&new Date(o.date+"T"+(o.time||"23:59")).getTime()<now).length,"доставок просрочено","bad")}
  if(mgr())c(O.filter(o=>+o.st>=2&&+o.st<5&&!o.paid).length,"заказов готово, но не оплачено","warn");
- if(["admin","florist"].includes(S.role))c(INV.filter(i=>i.qty<=(+i.min||0)).length,"позиций на складе заканчивается","warn");
+ if(["admin","operator","florist"].includes(S.role))c(INV.filter(i=>i.qty<=(+i.min||0)).length,"позиций на складе заканчивается","warn");
  return a.length?`<h2>Уведомления</h2><div class="card">${a.map(x=>`<div class="ln"><span class="pill ${x[2]}">${x[0]}</span><span>${x[1]}</span></div>`).join("")}</div>`:""}
 /* ===== График, статистика, быстрые заказы ===== */
 let SHL=[],wk=0,fdt="",vv="s",LC=[],LOC="";try{LOC=localStorage.getItem("loc")||""}catch(e){}
@@ -423,4 +423,6 @@ document.addEventListener("click",e=>{const g=e.target.closest('[data-a="goto"]'
  if(locs().length>1&&!LOC)return toast("Выберите точку сверху");const t=today(),L=myLoc(),k=v.dataset.a==="vs_in"?"in":"buy",d=+v.dataset.id,cur=VS.find(x=>x.id===t+"_"+L);
  if(d<0&&!(cur&&cur[k]>0))return;run(()=>db.collection("visits").doc(t+"_"+L).set({date:t,loc:L,[k]:firebase.firestore.FieldValue.increment(d)},{merge:true}))});
 matchMedia("(min-width:900px)").addEventListener("change",()=>{if(S)draw()});
+document.addEventListener("focusin",e=>{const i=e.target;if(i.matches&&i.matches("input[type=number]")&&i.value==="0"){i.value="";i.dataset.z="1"}});
+document.addEventListener("focusout",e=>{const i=e.target;if(i.matches&&i.matches("input[type=number]")&&i.dataset.z==="1"){if(i.value==="")i.value="0";delete i.dataset.z;i.dispatchEvent(new Event("input",{bubbles:true}))}});
 </script></body></html>

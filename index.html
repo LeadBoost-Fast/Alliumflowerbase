@@ -32,7 +32,7 @@ nav button{flex:1 0 auto;min-width:62px;border:0;background:none;border-radius:1
 <script src="https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore-compat.js"></script>
 <script>
 "use strict";
-const cfg={apiKey:"AIzaSyAjvGmsPZSJGc0bnlsg9s4mntXuReBQM1E",authDomain:"alliumshop.firebaseapp.com",projectId:"alliumshop",storageBucket:"alliumshop.firebasestorage.app",messagingSenderId:"115056113788",appId:"1:115056113788:web:e228808cb564c9718671f9"};
+const cfg={apiKey:"AIzaSyAAEXuWjjElAfRsANJjlHgAtvoTVtHJ2WA",authDomain:"alliumflower-9cd6b.firebaseapp.com",projectId:"alliumflower-9cd6b",storageBucket:"alliumflower-9cd6b.firebasestorage.app",messagingSenderId:"349951323253",appId:"1:349951323253:web:9359203d3aa658c77e1c3c"};
 firebase.initializeApp(cfg);const auth=firebase.auth(),db=firebase.firestore(),TS=()=>firebase.firestore.FieldValue.serverTimestamp();
 const $=i=>document.getElementById(i),esc=s=>String(s??"").replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c])),M=n=>Math.round(+n||0).toLocaleString("ru-RU")+" ₸";
 const ST=["Новый","Собирается","Готов","В пути","Выдан","Отменён"],RL={admin:"Администратор",operator:"Оператор",florist:"Флорист",courier:"Курьер"},SRC=["Instagram","WhatsApp","2ГИС","Телефон","Другое"],PAY=["Kaspi","Наличные","Перевод"];

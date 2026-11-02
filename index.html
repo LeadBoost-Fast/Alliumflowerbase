@@ -173,7 +173,7 @@ else if (tab === 'admin') renderAdminTab();
 }
 async function renderOrdersTab() {
 const container = document.getElementById('main-content');
-container.innerHTML =  <div class="tab-header"><h2>Заказы магазина</h2></div> <div class="form-card"> <h3>Новый заказ</h3> <form onsubmit="saveOrder(event)"> <div class="input-group"><label>ФИО Клиента</label><input type="text" id="ord-name" required></div> <div class="input-group"><label>Телефон</label><input type="text" id="ord-phone" required></div> <div class="input-group"><label>Адрес доставки</label><input type="text" id="ord-address" required></div> <div class="input-group"><label>Пожелания к букету</label><textarea id="ord-items" rows="2" required></textarea></div> <div class="input-group"><label>Стоимость (₽)</label><input type="number" id="ord-total" required></div> <button type="submit" class="btn-primary">Создать заказ</button> </form> </div> <div id="orders-feed">Загрузка ленты...</div>;
+container.innerHTML = <div class="tab-header"><h2>Заказы магазина</h2></div> <div class="form-card"> <h3>Новый заказ</h3> <form onsubmit="saveOrder(event)"> <div class="input-group"><label>ФИО Клиента</label><input type="text" id="ord-name" required></div> <div class="input-group"><label>Телефон</label><input type="text" id="ord-phone" required></div> <div class="input-group"><label>Адрес доставки</label><input type="text" id="ord-address" required></div> <div class="input-group"><label>Пожелания к букету</label><textarea id="ord-items" rows="2" required></textarea></div> <div class="input-group"><label>Стоимость (₽)</label><input type="number" id="ord-total" required></div> <button type="submit" class="btn-primary">Создать заказ</button> </form> </div> <div id="orders-feed">Загрузка ленты...</div>;
 try {
 const res = await fetch(https://googleapis.com{CONFIG.project}/databases/(default)/documents/orders, {
 headers: { 'Authorization': Bearer ${State.token} }
@@ -186,7 +186,7 @@ data.documents.forEach(doc => {
 const f = doc.fields;
 const item = document.createElement('div');
 item.className = order-card status-${f.status.stringValue};
-item.innerHTML =  <div class="card-row"> <span class="order-number">Заказ №${f.orderNumber.stringValue}</span> <span class="order-price">${f.total.stringValue || f.total.integerValue} ₽</span> </div> <div class="card-row" style="color:var(--text-muted); font-size:0.9rem;"> <span>${f.clientName.stringValue} (${f.clientPhone.stringValue})</span> </div> <div class="card-row" style="margin-top:6px; font-size:0.85rem;"> <span>📍 ${f.address.stringValue}</span> </div> <div class="item-row-display">📋 ${f.details.stringValue}</div>;
+item.innerHTML = <div class="card-row"> <span class="order-number">Заказ №${f.orderNumber.stringValue}</span> <span class="order-price">${f.total.stringValue || f.total.integerValue} ₽</span> </div> <div class="card-row" style="color:var(--text-muted); font-size:0.9rem;"> <span>${f.clientName.stringValue} (${f.clientPhone.stringValue})</span> </div> <div class="card-row" style="margin-top:6px; font-size:0.85rem;"> <span>📍 ${f.address.stringValue}</span> </div> <div class="item-row-display">📋 ${f.details.stringValue}</div>;
 feed.appendChild(item);
 });
 } catch(e) { console.log(e); }
